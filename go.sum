@@ -1,0 +1,11 @@
+bitbucket.org/iharsuvorau/crossref v0.0.0-20190926103312-db3cf5a65c44/go.mod h1:TCAmt73Hp29uRIHmbBBqQgZh1gc421AnZnf5z0tN/+E=
+bitbucket.org/iharsuvorau/crossref v0.0.0-20190926174753-4c3f0ebb998c h1:f73ZJ3SRrkm9glIYM+aNIL9vxGmAvShRKQsPX1h8gLg=
+bitbucket.org/iharsuvorau/crossref v0.0.0-20190926174753-4c3f0ebb998c/go.mod h1:TCAmt73Hp29uRIHmbBBqQgZh1gc421AnZnf5z0tN/+E=
+bitbucket.org/iharsuvorau/mediawiki v0.0.0-20190910151430-d86370c34e42 h1:DWb22vVhjTLU/ZIYSu7b+YsAe1JrYfN5cfC+ahrbPow=
+bitbucket.org/iharsuvorau/mediawiki v0.0.0-20190910151430-d86370c34e42/go.mod h1:xxH38AOiz8Qh62D2s+zN6KlH3/02h7k6aQXNbwiHzOQ=
+bitbucket.org/iharsuvorau/orcid v0.0.0-20191003182008-b46475f211e9 h1:zuqtwbWSvI3mJ9VynD/v1TruA1zAyc0N1laWDzzxa3k=
+bitbucket.org/iharsuvorau/orcid v0.0.0-20191003182008-b46475f211e9/go.mod h1:rcl54dAMRncz/R43xZxqOFl3q+ytT1z/hb/cOd6XY9M=
+github.com/nickng/bibtex v1.0.1 h1:Uop3DVOdQdrTamXfxr65f9KyHrd4RhttXwHi1BY6Wk0=
+github.com/nickng/bibtex v1.0.1/go.mod h1:0qHZj8RRrLaGXyPoF9odM3M1EX1HnWiwACyR3wgGf8U=
+github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
+github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
