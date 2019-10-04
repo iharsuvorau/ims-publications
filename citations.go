@@ -123,10 +123,8 @@ func citationContributors(w *orcid.Work, logger *log.Logger) []*orcid.Contributo
 	switch w.Citation.Type {
 	case "formatted-ieee":
 		authors, err = parseCitationAuthorsIEEE(w.Citation.Value)
-		break
 	case "bibtex":
 		authors, err = parseCitationAuthorsBibTeX(w.Citation.Value)
-		break
 	default:
 		logger.Printf("unsupported citation type: %s", w.Citation.Type)
 		return nil
