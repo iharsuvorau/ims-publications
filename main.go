@@ -16,6 +16,7 @@ import (
 func main() {
 	mwBaseURL := flag.String("mediawiki", "https://ims.ut.ee", "mediawiki base URL")
 	crossrefApiURL := flag.String("crossref", "http://api.crossref.org/v1", "crossref API base URL")
+	orcidApiURL := flag.String("orcid", "https://pub.orcid.org/v2.1", "orcid API base URL")
 	section := flag.String("section", "Publications", "section title for the publication to look for on a user's page or of the new one to add to the page")
 	category := flag.String("category", "", "category of users to update profile pages for, if it's empty all users' pages will be updated")
 	lgName := flag.String("name", "", "login name of the bot for updating pages")
@@ -42,6 +43,11 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	orcl, err := orcid.New(*orcidApiURL)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
 	//
 	// Publications for each user
 	//
@@ -55,7 +61,7 @@ func main() {
 	// TODO: it's not clear, that orcid.FetchWorks is going to look at a
 	// specific file in the file system first for publications and that
 	// it's going to save XML also
-	if err = fetchPublications(logger, users); err != nil {
+	if err = fetchPublications(logger, users, orcl); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -70,7 +76,7 @@ func main() {
 		var err error
 		var obsoleteDuration = time.Hour * 23 // TODO: time condition should be passed by a caller
 		for _, u := range users {
-			fpath = u.Orcid.UserID() + ".xml"
+			fpath = u.OrcID.String() + ".xml"
 			if !isFileNew(fpath, obsoleteDuration) { // saves once in 23 hours
 				err = dumpUserWorks(u)
 				if err != nil {
@@ -100,7 +106,7 @@ func main() {
 	}
 	logger.Printf("PI users to process: %+v", len(usersPI))
 
-	if err = fetchPublications(logger, usersPI); err != nil {
+	if err = fetchPublications(logger, usersPI, orcl); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -127,7 +133,7 @@ func flagsStringFatalCheck(ss ...*string) {
 }
 
 func dumpUserWorks(u *User) error {
-	fpath := u.Orcid.UserID() + ".xml"
+	fpath := u.OrcID.String() + ".xml"
 	f, err := os.Create(fpath)
 	if err != nil {
 		return fmt.Errorf("failed to create file %s: %v", fpath, err)
@@ -143,18 +149,6 @@ func dumpUserWorks(u *User) error {
 // and returns true if it was modified during the previous maxDuration
 // hours.
 func isFileNew(fpath string, maxDuration time.Duration) bool {
-	f, err := os.Open(fpath)
-	defer func() {
-		err = f.Close()
-		if err != nil {
-			log.Println("isFileNew error:", err)
-		}
-	}()
-
-	if err != nil {
-		return false
-	}
-
 	stat, err := os.Stat(fpath)
 	if err != nil {
 		return false
@@ -182,7 +176,7 @@ func updateContributorsLine(users []*User) {
 
 }
 
-func fetchPublications(logger *log.Logger, users []*User) error {
+func fetchPublications(logger *log.Logger, users []*User, orcidClient *orcid.Client) error {
 	if len(users) == 0 {
 		return nil
 	}
@@ -193,13 +187,14 @@ func fetchPublications(logger *log.Logger, users []*User) error {
 	var obsoleteDuration = time.Hour * 23 // TODO: time condition should be passed by a caller
 
 	for _, u := range users { // TODO: use goroutines
-		fpath = u.Orcid.UserID() + ".xml"
+		fpath = u.OrcID.String() + ".xml"
 		if isFileNew(fpath, obsoleteDuration) {
 			logger.Printf("reading from a file for %v", u.Title)
 			u.Works, err = orcid.ReadWorks(fpath)
 		} else {
 			logger.Printf("fetching works from ORCID for %v", u.Title)
-			u.Works, err = u.Orcid.FetchWorks(logger)
+			u.Works, err = orcid.FetchWorks(orcidClient, u.OrcID, logger,
+				orcid.UpdateExternalIDsURL, orcid.UpdateContributorsLine, orcid.UpdateMarkup)
 		}
 		if err != nil {
 			return err

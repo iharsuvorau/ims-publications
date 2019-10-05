@@ -18,7 +18,7 @@ import (
 // User is a MediaWiki user with registries which handle publications.
 type User struct {
 	Title string
-	Orcid *orcid.Registry
+	OrcID orcid.ID
 	Works []*orcid.Work
 }
 
@@ -59,7 +59,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 			links, err := mediawiki.GetExternalLinks(mwURI, title)
 			if err != nil {
 				// TODO: unify the usage of errors or delete it
-				errs <- errors.Wrapf(err, "GetExternalLinks failed with user title: %s", title)
+				errs <- fmt.Errorf("GetExternalLinks failed for %s: %v", title, err)
 			}
 			if len(links) == 0 {
 				return
@@ -71,22 +71,22 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 			// create a user and registries
 			user := User{Title: title}
 			for _, link := range links {
-				// adding the ORCID registry
 				if strings.Contains(link, "orcid.org") {
-					r, err := orcid.New(link)
+					id, err := orcid.IDFromURL(link)
 					if err != nil {
-						errs <- errors.Wrap(err, "failed to create orcid registry")
+						errs <- fmt.Errorf("GetExternalLinks failed to create orcid registry: %v", err)
+						break
 					}
-					user.Orcid = r
-					// break after the first appending to
-					// add only one orcid from each user
-					// page
+					user.OrcID = id
+					// there could be infinite amount of
+					// ORCIDs on a page, but we add only
+					// the first one and break
 					break
 				}
 			}
 
 			// return only users for whom we need to update profile pages
-			if user.Orcid != nil {
+			if !user.OrcID.IsEmpty() {
 				mut.Lock()
 				users = append(users, &user)
 				mut.Unlock()

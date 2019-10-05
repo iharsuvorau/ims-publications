@@ -20,5 +20,5 @@ darwin:
 	mkdir -p build/linux
 	GOOS=darwin GOARCH=amd64 go build -o build/darwin/$(BIN)
 
-run_dev:
-	go run main.go -mediawiki "http://hefty.local/~ihar/ims/1.32.2" -category "PI" -name "Ihar@mw-publications" -pass "71b1nbj468uvp9fq9urctumi2qn37778"
+run_dev: main.go citations.go crossref.go mediawiki.go
+	go run $^ -mediawiki "http://hefty.local/~ihar/ims/1.32.2" -category "PI" -name "Ihar@mw-publications" -pass "71b1nbj468uvp9fq9urctumi2qn37778"

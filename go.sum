@@ -4,6 +4,8 @@ bitbucket.org/iharsuvorau/mediawiki v1.0.0 h1:BfNf7D6beK4DGYwm03jv5Gl1tTmPK/z0UE
 bitbucket.org/iharsuvorau/mediawiki v1.0.0/go.mod h1:xxH38AOiz8Qh62D2s+zN6KlH3/02h7k6aQXNbwiHzOQ=
 bitbucket.org/iharsuvorau/orcid v1.0.0 h1:iRf+4CBRlSt9OAGmS2uF56onkkpn+pZFG6hgDExO0MM=
 bitbucket.org/iharsuvorau/orcid v1.0.0/go.mod h1:CTNkSakQgrZlSlb4fp7pGgyACMi7vNvgwGR7MOWzU6U=
+bitbucket.org/iharsuvorau/orcid v1.0.2 h1:pZNXzWc4ee2hNuTqGCEyOo/2M/W8HY8VS68aC+7szoY=
+bitbucket.org/iharsuvorau/orcid v1.0.2/go.mod h1:CTNkSakQgrZlSlb4fp7pGgyACMi7vNvgwGR7MOWzU6U=
 github.com/nickng/bibtex v1.0.1 h1:Uop3DVOdQdrTamXfxr65f9KyHrd4RhttXwHi1BY6Wk0=
 github.com/nickng/bibtex v1.0.1/go.mod h1:0qHZj8RRrLaGXyPoF9odM3M1EX1HnWiwACyR3wgGf8U=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=

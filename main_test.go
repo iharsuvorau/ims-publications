@@ -82,15 +82,22 @@ func Test_groupByTypeAndYear(t *testing.T) {
 
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
+	const apiBase = "https://pub.orcid.org/v2.1"
+
+	client, err := orcid.New(apiBase)
+	if err != nil {
+		t.Error(err)
+	}
+
 	for _, id := range ids {
-		registry, err := orcid.New(id)
+		oid, err := orcid.IDFromURL(id)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 
-		works, err := registry.FetchWorks(logger)
+		works, err := orcid.FetchWorks(client, oid, logger)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 
 		if len(works) == 0 {
@@ -98,14 +105,16 @@ func Test_groupByTypeAndYear(t *testing.T) {
 		}
 
 		byTypeAndYear := groupByTypeAndYear(works)
-		t.Logf("result: %+v", byTypeAndYear)
+		//t.Logf("result: %+v", byTypeAndYear)
 
 		markup, err := renderTmpl(byTypeAndYear, "publications-by-year.tmpl")
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
-		t.Logf("markup: %s", markup)
-		//t.Fail()
+		if len(markup) == 0 {
+			t.Error("there must be markup, got 0")
+		}
+		//t.Logf("markup: %s", markup)
 	}
 }
 
@@ -121,13 +130,20 @@ func Test_getMissingAuthorsCrossRef(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	const apiBase = "https://pub.orcid.org/v2.1"
+
+	orcl, err := orcid.New(apiBase)
+	if err != nil {
+		t.Error(err)
+	}
+
 	for _, id := range ids {
-		registry, err := orcid.New(id)
+		oid, err := orcid.IDFromURL(id)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 
-		works, err := registry.FetchWorks(logger)
+		works, err := orcid.FetchWorks(orcl, oid, logger)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -138,10 +154,7 @@ func Test_getMissingAuthorsCrossRef(t *testing.T) {
 
 		t.Logf("contributors before: %+v", works[0].Contributors)
 
-		err = getMissingAuthorsCrossRef(cref, works[:1], logger)
-		if err != nil {
-			t.Fatal(err)
-		}
+		works[0].Contributors = crossRefContributors(works[0], cref, logger)
 
 		t.Logf("contributors after: %+v", works[0].Contributors)
 	}
@@ -158,7 +171,14 @@ func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = fetchPublications(logger, users)
+	const apiBase = "https://pub.orcid.org/v2.1"
+
+	orcl, err := orcid.New(apiBase)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = fetchPublications(logger, users, orcl)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,9 +193,9 @@ func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 	if len(users) > 1 {
 		users = users[:1]
 	}
-	// if len(users[0].Works) > 2 {
-	// 	users[0].Works = users[0].Works[:2]
-	// }
+	if len(users[0].Works) > 2 {
+		users[0].Works = users[0].Works[:2]
+	}
 
 	t.Log("before")
 	for _, u := range users {
