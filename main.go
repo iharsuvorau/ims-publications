@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"bitbucket.org/iharsuvorau/crossref"
-	"bitbucket.org/iharsuvorau/orcid"
+	"bitbucket.org/iharsuvorau/orcid/v2/orcid"
 )
 
 func main() {

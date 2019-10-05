@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"bitbucket.org/iharsuvorau/crossref"
-	"bitbucket.org/iharsuvorau/orcid"
+	"bitbucket.org/iharsuvorau/orcid/v2/orcid"
 )
 
 func crossRefContributors(w *orcid.Work, cref *crossref.Client, logger *log.Logger) []*orcid.Contributor {
