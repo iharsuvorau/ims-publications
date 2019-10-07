@@ -15,6 +15,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+// tmplFuncs is used in the template.
+var tmplFuncs = map[string]interface{}{
+	"stripPrefix": stripPrefix,
+	"stripPrefixURL": stripPrefixURL,
+}
+
 // User is a MediaWiki user with registries which handle publications.
 type User struct {
 	Title string
@@ -171,9 +177,9 @@ func updatePublicationsByYearWithWorks(mwURI, lgName, lgPass string, users []*Us
 }
 
 func renderTmpl(data interface{}, tmplPath string) (string, error) {
-	var tmpl = template.Must(template.ParseFiles(tmplPath))
+	var tmpl = template.Must(template.New("").Funcs(tmplFuncs).ParseFiles(tmplPath))
 	var out bytes.Buffer
-	err := tmpl.Execute(&out, data)
+	err := tmpl.ExecuteTemplate(&out, tmplPath, data)
 	return out.String(), err
 }
 
@@ -242,4 +248,12 @@ func groupByTypeAndYear(works []*orcid.Work) map[string][][]*orcid.Work {
 	}
 
 	return byTypeAndYear
+}
+
+func stripPrefix(s, prefix string) string {
+	return strings.TrimPrefix(s, prefix)
+}
+
+func stripPrefixURL(s template.URL, prefix string) string {
+	return strings.TrimPrefix(string(s), prefix)
 }

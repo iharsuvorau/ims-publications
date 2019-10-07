@@ -4,7 +4,7 @@
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
@@ -20,7 +20,7 @@
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
@@ -36,7 +36,7 @@
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
