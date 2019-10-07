@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"bitbucket.org/iharsuvorau/crossref"
-	"bitbucket.org/iharsuvorau/orcid/v2/orcid"
+	"bitbucket.org/iharsuvorau/orcid/v2"
 )
 
 func TestExploreUsers(t *testing.T) {

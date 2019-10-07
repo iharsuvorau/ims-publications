@@ -11,7 +11,7 @@ import (
 
 	"bitbucket.org/iharsuvorau/crossref"
 	"bitbucket.org/iharsuvorau/mediawiki"
-	"bitbucket.org/iharsuvorau/orcid/v2/orcid"
+	"bitbucket.org/iharsuvorau/orcid/v2"
 	"github.com/pkg/errors"
 )
 

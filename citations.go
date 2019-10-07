@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"bitbucket.org/iharsuvorau/orcid/v2/orcid"
+	"bitbucket.org/iharsuvorau/orcid/v2"
 	"github.com/nickng/bibtex"
 )
 
