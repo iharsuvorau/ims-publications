@@ -343,3 +343,62 @@ doi: 10.1109/IMWS-BIO.2013.6756176`,
 		})
 	}
 }
+
+func Test_unescapedDoiURL(t *testing.T) {
+	ids := []string{
+		"https://orcid.org/0000-0003-0466-2514",
+	}
+
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+
+	const apiBase = "https://pub.orcid.org/v2.1"
+
+	users, err := exploreUsers("https://ims.ut.ee", "PI", logger)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Logf("users: %v", len(users))
+
+	filteredUsers := []*User{}
+	for _, id := range ids {
+		oid, err := orcid.IDFromURL(id)
+		if err != nil {
+			t.Error(err)
+		}
+
+		for _, u := range users {
+			if string(u.OrcID) == string(oid) {
+				filteredUsers = append(filteredUsers, u)
+			}
+		}
+	}
+
+	t.Logf("filtered users: %v", len(filteredUsers))
+
+	orcidClient, err := orcid.New(apiBase)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, u := range filteredUsers {
+		u.Works, err = orcid.FetchWorks(orcidClient, u.OrcID, logger,
+			orcid.UpdateExternalIDsURL, orcid.UpdateContributorsLine, orcid.UpdateMarkup)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	updateContributorsLine(filteredUsers)
+
+	for _, u := range filteredUsers {
+		byTypeAndYear := groupByTypeAndYear(u.Works)
+
+		markup, err := renderTmpl(byTypeAndYear, "publications-list.tmpl")
+		if err != nil {
+			t.Error(err)
+		}
+
+		t.Logf(markup)
+	}
+}
