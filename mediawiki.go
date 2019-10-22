@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net/url"
 	"sort"
 	"strings"
 	"sync"
@@ -17,8 +18,9 @@ import (
 
 // tmplFuncs is used in the template.
 var tmplFuncs = map[string]interface{}{
-	"stripPrefix": stripPrefix,
+	"stripPrefix":    stripPrefix,
 	"stripPrefixURL": stripPrefixURL,
+	"unescape":       unescape,
 }
 
 // User is a MediaWiki user with registries which handle publications.
@@ -254,6 +256,15 @@ func stripPrefix(s, prefix string) string {
 	return strings.TrimPrefix(s, prefix)
 }
 
-func stripPrefixURL(s template.URL, prefix string) string {
+func stripPrefixURL(s template.HTML, prefix string) string {
 	return strings.TrimPrefix(string(s), prefix)
+}
+
+func unescape(s template.HTML) (template.HTML, error) {
+	u, err := url.Parse(string(s))
+	if err != nil {
+		return "", err
+	}
+
+	return template.HTML(u.Scheme + "://" + u.Host + u.Path), nil
 }

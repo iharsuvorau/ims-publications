@@ -4,7 +4,7 @@
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. [{{.DoiURI}} {{unescape .DoiURI}}]
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
@@ -14,13 +14,13 @@
 {{end -}}
 {{end}}
 
-{{- $works = (index . "Conference Papers") -}}
+{{- $works = (index . "Conference Papers") }}
 {{if gt (len $works) 0 }}
 === Conference Papers ===
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. [{{.DoiURI}} {{unescape .DoiURI}}]
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
@@ -30,13 +30,13 @@
 {{end -}}
 {{end}}
 
-{{- $works = (index . "Other") -}}
+{{- $works = (index . "Other") }}
 {{if gt (len $works) 0 }}
 === Other ===
 {{range $works}}
 {{- range .}}
 {{- if .DoiURI }}
-* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. {{.DoiURI}}
+* {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.DoiURI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}. [{{.DoiURI}} {{unescape .DoiURI}}]
 {{- else if .URI }}
 * {{if .ContributorsLine}}{{.ContributorsLine}} {{end}}{{if .Year}}({{.Year}}) {{end}}[{{.URI}} <nowiki>{{.Title}}</nowiki>]{{if .JournalTitle}}, ''{{.JournalTitle}}''{{end}}.
 {{- else }}
