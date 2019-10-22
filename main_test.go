@@ -399,6 +399,6 @@ func Test_unescapedDoiURL(t *testing.T) {
 			t.Error(err)
 		}
 
-		t.Logf(markup)
+		t.Log(markup)
 	}
 }
