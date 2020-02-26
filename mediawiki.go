@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 
-	"bitbucket.org/iharsuvorau/crossref"
+	"bitbucket.org/iharsuvorau/ims-publications/crossref"
+	"bitbucket.org/iharsuvorau/ims-publications/orcid"
 	"bitbucket.org/iharsuvorau/mediawiki"
-	"bitbucket.org/iharsuvorau/orcid/v2"
 	"github.com/pkg/errors"
 )
 

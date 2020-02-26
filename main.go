@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/iharsuvorau/crossref"
-	"bitbucket.org/iharsuvorau/orcid/v2"
+	"bitbucket.org/iharsuvorau/ims-publications/crossref"
+	"bitbucket.org/iharsuvorau/ims-publications/orcid"
 )
 
 func main() {
 	mwBaseURL := flag.String("mediawiki", "https://ims.ut.ee", "mediawiki base URL")
-	crossrefApiURL := flag.String("crossref", "http://api.crossref.org/v1", "crossref API base URL")
-	orcidApiURL := flag.String("orcid", "https://pub.orcid.org/v2.1", "orcid API base URL")
+	crossrefURL := flag.String("crossref", "http://api.crossref.org/v1", "crossref API base URL")
+	orcidURL := flag.String("orcid", "https://pub.orcid.org/v2.1", "orcid API base URL")
 	section := flag.String("section", "Publications", "section title for the publication to look for on a user's page or of the new one to add to the page")
 	category := flag.String("category", "", "category of users to update profile pages for, if it's empty all users' pages will be updated")
 	lgName := flag.String("name", "", "login name of the bot for updating pages")
@@ -24,7 +24,7 @@ func main() {
 	logPath := flag.String("log", "", "specify the filepath for a log file, if it's empty all messages are logged into stdout")
 	flag.Parse()
 
-	flagsStringFatalCheck(mwBaseURL, crossrefApiURL, section, lgName, lgPass)
+	flagsStringFatalCheck(mwBaseURL, crossrefURL, section, lgName, lgPass)
 
 	var logger *log.Logger
 	if len(*logPath) > 0 {
@@ -38,16 +38,6 @@ func main() {
 		logger = log.New(os.Stdout, "", log.LstdFlags)
 	}
 
-	cref, err := crossref.New(*crossrefApiURL)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	orcl, err := orcid.New(*orcidApiURL)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
 	//
 	// Publications for each user
 	//
@@ -58,14 +48,21 @@ func main() {
 	}
 	logger.Printf("users to update: %+v", len(users))
 
-	// TODO: it's not clear, that orcid.FetchWorks is going to look at a
-	// specific file in the file system first for publications and that
-	// it's going to save XML also
-	if err = fetchPublications(logger, users, orcl); err != nil {
+	orcidClient, err := orcid.New(*orcidURL)
+	if err != nil {
 		logger.Fatal(err)
 	}
 
-	err = fetchMissingAuthors(cref, logger, users)
+	if err = fetchPublicationsIfNeeded(logger, users, orcidClient); err != nil {
+		logger.Fatal(err)
+	}
+
+	// crossref part
+	crossrefClient, err := crossref.New(*crossrefURL)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	err = fetchMissingAuthors(crossrefClient, logger, users)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -89,7 +86,7 @@ func main() {
 	// used by the template in updateProfilePagesWithWorks
 	updateContributorsLine(users) // TODO: make cleaner, hide this detail
 
-	err = updateProfilePagesWithWorks(*mwBaseURL, *lgName, *lgPass, *section, users, logger, cref)
+	err = updateProfilePagesWithWorks(*mwBaseURL, *lgName, *lgPass, *section, users, logger, crossrefClient)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -106,11 +103,11 @@ func main() {
 	}
 	logger.Printf("PI users to process: %+v", len(usersPI))
 
-	if err = fetchPublications(logger, usersPI, orcl); err != nil {
+	if err = fetchPublicationsIfNeeded(logger, usersPI, orcidClient); err != nil {
 		logger.Fatal(err)
 	}
 
-	err = fetchMissingAuthors(cref, logger, usersPI)
+	err = fetchMissingAuthors(crossrefClient, logger, usersPI)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -118,7 +115,7 @@ func main() {
 	// used by the template in updateProfilePagesWithWorks
 	updateContributorsLine(usersPI) // TODO: make cleaner, hide this detail
 
-	err = updatePublicationsByYearWithWorks(*mwBaseURL, *lgName, *lgPass, usersPI, logger, cref)
+	err = updatePublicationsByYearWithWorks(*mwBaseURL, *lgName, *lgPass, usersPI, logger, crossrefClient)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -176,7 +173,7 @@ func updateContributorsLine(users []*User) {
 
 }
 
-func fetchPublications(logger *log.Logger, users []*User, orcidClient *orcid.Client) error {
+func fetchPublicationsIfNeeded(logger *log.Logger, users []*User, orcidClient *orcid.Client) error {
 	if len(users) == 0 {
 		return nil
 	}

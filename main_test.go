@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	"bitbucket.org/iharsuvorau/crossref"
-	"bitbucket.org/iharsuvorau/orcid/v2"
+	"bitbucket.org/iharsuvorau/ims-publications/crossref"
+	"bitbucket.org/iharsuvorau/ims-publications/orcid"
 )
 
 func TestExploreUsers(t *testing.T) {
@@ -164,7 +164,7 @@ func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 	const mwBaseURL = "http://hefty.local/~ihar/ims/1.32.2"
 	const category = "PI"
-	const crossrefApiURL = "http://api.crossref.org/v1"
+	const crossrefURL = "http://api.crossref.org/v1"
 
 	users, err := exploreUsers(mwBaseURL, category, logger)
 	if err != nil {
@@ -178,7 +178,7 @@ func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = fetchPublications(logger, users, orcl)
+	err = fetchPublicationsIfNeeded(logger, users, orcl)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,7 @@ func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 		}
 	}
 
-	cref, err := crossref.New(crossrefApiURL)
+	cref, err := crossref.New(crossrefURL)
 	if err != nil {
 		log.Fatal(err)
 	}
