@@ -23,8 +23,8 @@ var tmplFuncs = map[string]interface{}{
 	"unescape":       unescape,
 }
 
-// User is a MediaWiki user with registries which handle publications.
-type User struct {
+// user is a MediaWiki user with registries which handle publications.
+type user struct {
 	Title string
 	OrcID orcid.ID
 	Works []*orcid.Work
@@ -33,7 +33,7 @@ type User struct {
 // exploreUsers gets users who belong to the category and fetches their
 // publication IDs and creates corresponding registries. If the category is
 // empty, all users are returned.
-func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
+func exploreUsers(mwURI, category string, logger *log.Logger) ([]*user, error) {
 	var userTitles []string
 	var err error
 
@@ -52,7 +52,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 		return nil, err
 	}
 
-	users := []*User{}
+	users := []*user{}
 	var mut sync.Mutex
 	var limit = 20
 	sem := make(chan bool, limit)
@@ -77,7 +77,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 			logger.Printf("%v discovered", title)
 
 			// create a user and registries
-			user := User{Title: title}
+			usr := user{Title: title}
 			for _, link := range links {
 				if strings.Contains(link, "orcid.org") {
 					id, err := orcid.IDFromURL(link)
@@ -85,7 +85,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 						errs <- fmt.Errorf("GetExternalLinks failed to create orcid registry: %v", err)
 						break
 					}
-					user.OrcID = id
+					usr.OrcID = id
 					// there could be infinite amount of
 					// ORCIDs on a page, but we add only
 					// the first one and break
@@ -94,9 +94,9 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 			}
 
 			// return only users for whom we need to update profile pages
-			if !user.OrcID.IsEmpty() {
+			if !usr.OrcID.IsEmpty() {
 				mut.Lock()
-				users = append(users, &user)
+				users = append(users, &usr)
 				mut.Unlock()
 			}
 		}(title)
@@ -117,7 +117,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*User, error) {
 
 // updateProfilePagesWithWorks fetches works for each user, updates personal pages and
 // purges cache for the aggregate Publications page.
-func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, users []*User, logger *log.Logger, cref *crossref.Client) error {
+func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, users []*user, logger *log.Logger, cref *crossref.Client) error {
 	if len(users) == 0 {
 		return nil
 	}
@@ -146,7 +146,7 @@ func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, use
 	return nil
 }
 
-func updatePublicationsByYearWithWorks(mwURI, lgName, lgPass string, users []*User, logger *log.Logger, cref *crossref.Client) error {
+func updatePublicationsByYearWithWorks(mwURI, lgName, lgPass string, users []*user, logger *log.Logger, cref *crossref.Client) error {
 	if len(users) == 0 {
 		return nil
 	}

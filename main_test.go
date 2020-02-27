@@ -10,69 +10,69 @@ import (
 	"bitbucket.org/iharsuvorau/ims-publications/orcid"
 )
 
-func TestExploreUsers(t *testing.T) {
-	logger := log.New(os.Stdout, "", log.LstdFlags)
+// func TestExploreUsers(t *testing.T) {
+// 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
-	args := []struct {
-		name      string
-		uri       string
-		category  string
-		wantErr   bool
-		zeroUsers bool
-	}{
-		{
-			name:      "A",
-			uri:       "http://hefty.local/~ihar/ims/1.32.2",
-			category:  "PI",
-			wantErr:   false,
-			zeroUsers: false,
-		},
-		{
-			name:      "B",
-			uri:       "http://hefty.local/~ihar/ims/1.32.2/",
-			category:  "PI",
-			wantErr:   false,
-			zeroUsers: false,
-		},
-		{
-			name:      "C",
-			uri:       "http://hefty.local/~ihar/ims/1.32.2/",
-			category:  "",
-			wantErr:   false,
-			zeroUsers: false,
-		},
-		{
-			name:      "D",
-			uri:       "http://hefty.local/",
-			category:  "",
-			wantErr:   true,
-			zeroUsers: true,
-		},
-		{
-			name:      "E",
-			uri:       "http://hefty.local/",
-			category:  "PI",
-			wantErr:   true,
-			zeroUsers: true,
-		},
-	}
+// 	args := []struct {
+// 		name      string
+// 		uri       string
+// 		category  string
+// 		wantErr   bool
+// 		zeroUsers bool
+// 	}{
+// 		{
+// 			name:      "A",
+// 			uri:       "http://hefty.local/~ihar/ims/1.32.2",
+// 			category:  "PI",
+// 			wantErr:   false,
+// 			zeroUsers: false,
+// 		},
+// 		{
+// 			name:      "B",
+// 			uri:       "http://hefty.local/~ihar/ims/1.32.2/",
+// 			category:  "PI",
+// 			wantErr:   false,
+// 			zeroUsers: false,
+// 		},
+// 		{
+// 			name:      "C",
+// 			uri:       "http://hefty.local/~ihar/ims/1.32.2/",
+// 			category:  "",
+// 			wantErr:   false,
+// 			zeroUsers: false,
+// 		},
+// 		{
+// 			name:      "D",
+// 			uri:       "http://hefty.local/",
+// 			category:  "",
+// 			wantErr:   true,
+// 			zeroUsers: true,
+// 		},
+// 		{
+// 			name:      "E",
+// 			uri:       "http://hefty.local/",
+// 			category:  "PI",
+// 			wantErr:   true,
+// 			zeroUsers: true,
+// 		},
+// 	}
 
-	for _, arg := range args {
-		t.Run(arg.name, func(t *testing.T) {
-			users, err := exploreUsers(arg.uri, arg.category, logger)
-			if users != nil {
-				t.Logf("users len: %v", len(users))
-			}
-			if err != nil && !arg.wantErr {
-				t.Error(err)
-			}
-			if users != nil && len(users) == 0 && !arg.zeroUsers {
-				t.Errorf("amount of users must be gt 0, arg: %+v", arg)
-			}
+// 	for _, arg := range args {
+// 		t.Run(arg.name, func(t *testing.T) {
+// 			users, err := exploreUsers(arg.uri, arg.category, logger)
+// 			if users != nil {
+// 				t.Logf("users len: %v", len(users))
+// 			}
+// 			if err != nil && !arg.wantErr {
+// 				t.Error(err)
+// 			}
+// 			if users != nil && len(users) == 0 && !arg.zeroUsers {
+// 				t.Errorf("amount of users must be gt 0, arg: %+v", arg)
+// 			}
 
-		})
-	}
-}
+// 		})
+// 	}
+// }
 
 func Test_groupByTypeAndYear(t *testing.T) {
 	ids := []string{
@@ -162,7 +162,7 @@ func Test_getMissingAuthorsCrossRef(t *testing.T) {
 
 func Test_fetchPublicationsAndMissingAuthors(t *testing.T) {
 	logger := log.New(os.Stdout, "", log.LstdFlags)
-	const mwBaseURL = "http://hefty.local/~ihar/ims/1.32.2"
+	const mwBaseURL = "https://ims.ut.ee"
 	const category = "PI"
 	const crossrefURL = "http://api.crossref.org/v1"
 
@@ -360,7 +360,7 @@ func Test_unescapedDoiURL(t *testing.T) {
 
 	t.Logf("users: %v", len(users))
 
-	filteredUsers := []*User{}
+	filteredUsers := []*user{}
 	for _, id := range ids {
 		oid, err := orcid.IDFromURL(id)
 		if err != nil {
@@ -400,5 +400,173 @@ func Test_unescapedDoiURL(t *testing.T) {
 		}
 
 		t.Log(markup)
+	}
+}
+
+func Test_removeDuplicatedWorksByDOI(t *testing.T) {
+	// setup
+
+	fpath := "testdata/0000-0003-0466-2514.json"
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+
+	u := &user{}
+
+	err := readUserJSON(u, fpath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(u.Works) == 0 {
+		t.Fatal("need more works for a test")
+	}
+
+	logger.Printf("%v works were read", len(u.Works))
+
+	// test
+
+	type args struct {
+		u      *user
+		logger *log.Logger
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "A",
+			args: args{
+				u:      u,
+				logger: logger,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			worksBefore := len(tt.args.u.Works)
+
+			err := removeDuplicatedWorksByDOI(tt.args.u, tt.args.logger)
+			if err != nil && !tt.wantErr {
+				t.Fatal(err)
+			}
+
+			worksAfter := len(tt.args.u.Works)
+
+			if worksBefore != 91 {
+				t.Fatal("wrong number of original works")
+			}
+
+			if worksAfter != 83 {
+				t.Fatalf("wrong number of unique works, got %v, want %v", worksAfter, 83)
+			}
+
+			t.Logf("before: %v, after: %v", worksBefore, worksAfter)
+		})
+	}
+}
+
+func Test_reportDuplicatedWorksByDOI(t *testing.T) {
+	// setup
+
+	fpath := "testdata/0000-0003-0466-2514.json"
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+
+	u := &user{}
+
+	err := readUserJSON(u, fpath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(u.Works) == 0 {
+		t.Fatal("need more works for a test")
+	}
+
+	logger.Printf("%v works were read", len(u.Works))
+
+	// test
+
+	type args struct {
+		u      *user
+		logger *log.Logger
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "A",
+			args: args{
+				u:      u,
+				logger: logger,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			unique, dups := reportDuplicatedWorksByDOI(tt.args.u, tt.args.logger)
+			if len(unique) != 83 || len(dups) != 8 {
+				t.Fatalf("got %v unique, want %v and %v dups, want %v",
+					len(unique), 83, len(dups), 8)
+			}
+		})
+	}
+}
+
+func Test_dumpUserJSON_and_readUserJSON(t *testing.T) {
+	// Note: This test fetches real data from ORCID API.
+
+	// setup
+
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+	mwURI := "https://ims.ut.ee"
+	orcidURL := "https://pub.orcid.org/v2.1"
+	category := "PI"
+	tarmoOrcID := orcid.ID("0000-0003-0466-2514")
+
+	users, err := exploreUsers(mwURI, category, logger)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// filter out everybody except the test subject
+	usersFiltered := make([]*user, 1)
+	for _, v := range users {
+		if v.OrcID == tarmoOrcID {
+			usersFiltered[0] = v
+			break
+		}
+	}
+
+	// fetch publications
+	orcidClient, err := orcid.New(orcidURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = fetchPublicationsIfNeeded(logger, usersFiltered, orcidClient); err != nil {
+		t.Fatal(err)
+	}
+
+	// getting the test subject
+	u := usersFiltered[0]
+	if u == nil {
+		t.Fatal("Tarmo wasn't found")
+	}
+
+	// test
+
+	// TODO: test shouldn't create persistent output files, remove them at the end
+
+	fpath, err := dumpUserJSON(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	uu := new(user)
+	err = readUserJSON(uu, fpath)
+
+	if u.Title != uu.Title || u.OrcID != uu.OrcID || len(u.Works) != len(uu.Works) {
+		t.Fatal("dumped and read back data is different")
 	}
 }

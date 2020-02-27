@@ -86,16 +86,12 @@ type Work struct {
 	// Work
 
 	// Path to detailed information about the work.
-	Path         string        `xml:"path,attr"`
-	Title        template.HTML `xml:"title>title"`
-	JournalTitle string        `xml:"journal-title"`
-	Citation     *Citation     `xml:"citation"`
-	Type         string        `xml:"type"`
-	ExternalIDs  []struct {
-		Type  string        `xml:"external-id-type"` // doi = Digital Object Identifier, eid = Scopus
-		Value string        `xml:"external-id-value"`
-		URL   template.HTML `xml:"external-id-url"`
-	} `xml:"external-ids>external-id"`
+	Path         string         `xml:"path,attr"`
+	Title        template.HTML  `xml:"title>title"`
+	JournalTitle string         `xml:"journal-title"`
+	Citation     *Citation      `xml:"citation"`
+	Type         string         `xml:"type"`
+	ExternalIDs  []ExternalID   `xml:"external-ids>external-id"`
 	URI          string         `xml:"url"`
 	Contributors []*Contributor `xml:"contributors>contributor"`
 
@@ -105,20 +101,48 @@ type Work struct {
 	ContributorsLine string
 }
 
-// ExternalIDValue returns ExternalID.Value by ExternalID.Type.
-func (w *Work) ExternalIDValue(s string) string {
-	if w == nil {
-		return ""
-	}
+// ExternalID represents an ID assigned to a work. One work can have many IDs in different registries.
+type ExternalID struct {
+	Type  string        `xml:"external-id-type"` // doi = Digital Object Identifier, eid = Scopus
+	Value string        `xml:"external-id-value"`
+	URL   template.HTML `xml:"external-id-url"`
+}
 
-	for _, v := range w.ExternalIDs {
-		if v.Type == s {
-			return v.Value
+// HasDOI checks if a DOI belongs to a work.
+func (w *Work) HasDOI() (ok bool) {
+	for _, id := range w.ExternalIDs {
+		if id.Type == "doi" {
+			ok = true
+			return
 		}
 	}
-
-	return ""
+	return
 }
+
+// GetDOI returns a DOI for a work.
+func (w *Work) GetDOI() *ExternalID {
+	for _, id := range w.ExternalIDs {
+		if id.Type == "doi" {
+			return &id
+		}
+	}
+	return nil
+}
+
+// ExternalIDValue returns ExternalID.Value by ExternalID.Type.
+// func (w *Work) ExternalIDValue(s string) string {
+// 	if w == nil {
+// 		return ""
+// 	}
+
+// 	for _, v := range w.ExternalIDs {
+// 		if v.Type == s {
+// 			return v.Value
+// 		}
+// 	}
+
+// 	return ""
+// }
 
 // Citation is an ORCID citation field.
 type Citation struct {

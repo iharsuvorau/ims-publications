@@ -13,6 +13,8 @@ func crossRefContributors(w *orcid.Work, cref *crossref.Client, logger *log.Logg
 		return nil
 	}
 
+	// TODO: another DOI check was introduced through the .HasDOI() and .GetDOI() methods on orcid.Work. Have to unify the procedure.
+
 	// DOI check
 	if len(string(w.DoiURI)) == 0 {
 		logger.Printf("publication doesn't have DOI: %v", w.Title)
