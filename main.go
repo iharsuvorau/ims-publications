@@ -70,6 +70,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	// TODO: there is orcid.WorksModifier for such kind of manipulations
 	removeDuplicatedWorks(users, logger)
 
 	// saving XML for each user
@@ -231,7 +232,9 @@ func fetchPublicationsIfNeeded(logger *log.Logger, users []*user, orcidClient *o
 		} else {
 			logger.Printf("fetching works from ORCID for %v", u.Title)
 			u.Works, err = orcid.FetchWorks(orcidClient, u.OrcID, logger,
-				orcid.UpdateExternalIDsURL, orcid.UpdateContributorsLine, orcid.UpdateMarkup)
+				orcid.UpdateExternalIDsURL,
+				orcid.UpdateContributorsLine,
+				orcid.UpdateMarkup)
 		}
 		if err != nil {
 			return err
@@ -282,14 +285,15 @@ func removeDuplicatedWorksByDOI(u *user, logger *log.Logger) error {
 	uniqueWorks := []*orcid.Work{}
 
 	for _, w := range u.Works {
-		if !w.HasDOI() && len(w.ExternalIDs) > 0 {
+		// skipping a work without DOI
+		if !w.HasDOI() {
 			uniqueWorks = append(uniqueWorks, w)
 			continue
 		}
 
 		id := w.GetDOI()
 		if id == nil {
-			return fmt.Errorf("DOI must exist, but nil is returned for %v", w.Path)
+			return fmt.Errorf("DOI must exist, but nil is returned for %v", w.Title)
 		}
 
 		if _, ok := m[id.Value]; !ok {
