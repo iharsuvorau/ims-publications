@@ -128,7 +128,7 @@ func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, use
 	)
 
 	for _, u := range users {
-		byTypeAndYear := groupByTypeAndYear(u.Works)
+		byTypeAndYear := groupByTypeAndYear(u.Works, logger)
 
 		markup, err := renderTmpl(byTypeAndYear, tmpl)
 		if err != nil {
@@ -163,7 +163,7 @@ func updatePublicationsByYearWithWorks(mwURI, lgName, lgPass string, users []*us
 		works = append(works, u.Works...)
 	}
 
-	byTypeAndYear := groupByTypeAndYear(works)
+	byTypeAndYear := groupByTypeAndYear(works, logger)
 
 	markup, err := renderTmpl(byTypeAndYear, tmpl)
 	if err != nil {
@@ -203,7 +203,7 @@ func getYearsSorted(works []*orcid.Work) []int {
 	return yearsSorted
 }
 
-func groupByTypeAndYear(works []*orcid.Work) map[string][][]*orcid.Work {
+func groupByTypeAndYear(works []*orcid.Work, logger *log.Logger) map[string][][]*orcid.Work {
 	// grouping by work type
 	byType := make(map[string][]*orcid.Work)
 	const (
@@ -246,6 +246,19 @@ func groupByTypeAndYear(works []*orcid.Work) map[string][][]*orcid.Work {
 					byTypeAndYear[k][i] = append(byTypeAndYear[k][i], w)
 				}
 			}
+		}
+
+	}
+
+	// removing duplicates
+	for t := range byTypeAndYear {
+		for i := range byTypeAndYear[t] {
+			works, err := filterDuplicatedWorksByDOI(byTypeAndYear[t][i], logger)
+			if err != nil {
+				logger.Println(err)
+				continue
+			}
+			byTypeAndYear[t][i] = works
 		}
 	}
 

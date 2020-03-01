@@ -104,7 +104,7 @@ func Test_groupByTypeAndYear(t *testing.T) {
 			t.Error("amount of works must be bigger than zero")
 		}
 
-		byTypeAndYear := groupByTypeAndYear(works)
+		byTypeAndYear := groupByTypeAndYear(works, logger)
 		//t.Logf("result: %+v", byTypeAndYear)
 
 		markup, err := renderTmpl(byTypeAndYear, "publications-by-year.tmpl")
@@ -392,7 +392,7 @@ func Test_unescapedDoiURL(t *testing.T) {
 	updateContributorsLine(filteredUsers)
 
 	for _, u := range filteredUsers {
-		byTypeAndYear := groupByTypeAndYear(u.Works)
+		byTypeAndYear := groupByTypeAndYear(u.Works, logger)
 
 		markup, err := renderTmpl(byTypeAndYear, "publications-list.tmpl")
 		if err != nil {
@@ -446,12 +446,12 @@ func Test_removeDuplicatedWorksByDOI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			worksBefore := len(tt.args.u.Works)
 
-			err := removeDuplicatedWorksByDOI(tt.args.u, tt.args.logger)
+			works, err := filterDuplicatedWorksByDOI(tt.args.u.Works, tt.args.logger)
 			if err != nil && !tt.wantErr {
 				t.Fatal(err)
 			}
 
-			worksAfter := len(tt.args.u.Works)
+			worksAfter := len(works)
 
 			if worksBefore != 91 {
 				t.Fatal("wrong number of original works")

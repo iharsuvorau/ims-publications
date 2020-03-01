@@ -274,17 +274,19 @@ func fetchMissingAuthors(cref *crossref.Client, logger *log.Logger, users []*use
 
 func removeDuplicatedWorks(users []*user, logger *log.Logger) {
 	for _, u := range users {
-		if err := removeDuplicatedWorksByDOI(u, logger); err != nil {
+		if works, err := filterDuplicatedWorksByDOI(u.Works, logger); err != nil {
 			logger.Printf("failed to remove duplicates by DOI for %v: %v", u.OrcID, err)
+		} else {
+			u.Works = works
 		}
 	}
 }
 
-func removeDuplicatedWorksByDOI(u *user, logger *log.Logger) error {
+func filterDuplicatedWorksByDOI(works []*orcid.Work, logger *log.Logger) ([]*orcid.Work, error) {
 	m := make(map[string]bool)
 	uniqueWorks := []*orcid.Work{}
 
-	for _, w := range u.Works {
+	for _, w := range works {
 		// skipping a work without DOI
 		if !w.HasDOI() {
 			uniqueWorks = append(uniqueWorks, w)
@@ -293,7 +295,7 @@ func removeDuplicatedWorksByDOI(u *user, logger *log.Logger) error {
 
 		id := w.GetDOI()
 		if id == nil {
-			return fmt.Errorf("DOI must exist, but nil is returned for %v", w.Title)
+			return uniqueWorks, fmt.Errorf("DOI must exist, but nil is returned for %v", w.Title)
 		}
 
 		if _, ok := m[id.Value]; !ok {
@@ -305,8 +307,7 @@ func removeDuplicatedWorksByDOI(u *user, logger *log.Logger) error {
 
 	}
 
-	u.Works = uniqueWorks
-	return nil
+	return uniqueWorks, nil
 }
 
 func reportDuplicatedWorksByDOI(u *user, logger *log.Logger) (unique []string, dups []string) {
