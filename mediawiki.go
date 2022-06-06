@@ -117,7 +117,7 @@ func exploreUsers(mwURI, category string, logger *log.Logger) ([]*user, error) {
 
 // updateProfilePagesWithWorks fetches works for each user, updates personal pages and
 // purges cache for the aggregate Publications page.
-func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, users []*user, logger *log.Logger, cref *crossref.Client) error {
+func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, users []*user, logger *log.Logger) error {
 	if len(users) == 0 {
 		return nil
 	}
@@ -137,7 +137,9 @@ func updateProfilePagesWithWorks(mwURI, lgName, lgPass, sectionTitle string, use
 
 		_, err = mediawiki.UpdatePage(mwURI, u.Title, markup, contentModel, lgName, lgPass, sectionTitle)
 		if err != nil {
-			return err
+			logger.Printf("profile page update failed for %s with error: %v", u.Title, err)
+			err = nil
+			continue
 		}
 
 		logger.Printf("profile page for %s is updated", u.Title)

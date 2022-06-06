@@ -4,3 +4,4 @@ testdata/
 *~
 *.xml
 *.log
+.idea

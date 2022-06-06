@@ -92,7 +92,7 @@ func main() {
 	// used by the template in updateProfilePagesWithWorks
 	updateContributorsLine(users) // TODO: make cleaner, hide this detail
 
-	err = updateProfilePagesWithWorks(*mwBaseURL, *lgName, *lgPass, *section, users, logger, crossrefClient)
+	err = updateProfilePagesWithWorks(*mwBaseURL, *lgName, *lgPass, *section, users, logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
